@@ -49,6 +49,7 @@
         data.forEach(element => {
 
             let card = createCard(element);
+            card.classList.add("text-right");
             let linkElement = document.createElement('a');
             linkElement.setAttribute('href', `${element.link}`)
             linkElement.appendChild(card);
