@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+
+}
+
+<nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand" href="#" onclick="refresh();">רענן</a>
+</nav>
+
+<div class="sidenav" id="sidenav">
+</div>
+<div id="cards">
+
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        sessionStorage.setItem("categoryIndex", 0);
+        getData(0);
+        getCategories();
+    });
+
+
+    function getData(id) {
+        fetch(`https://localhost:44383/Home/GetItems/${id}`)
+            .then(response => response.json())
+            .then(data => renderCards(data));
+    }
+
+    function getCategories() {
+        fetch(`https://localhost:44383/Home/GetCategories`)
+            .then(response => response.json())
+            .then(data => renderMenu(data));
+
+    }
+
+    function refresh() {
+        let categoryIndex = sessionStorage.getItem("categoryIndex");
+        getData(categoryIndex);
+    }
+
+
+
+    function renderCards(data) {
+        console.log(data);
+        let cardDiv = document.getElementById("cards")
+        cardDiv.innerHTML = "";
+        data.forEach(element => {
+
+            let card = createCard(element);
+            let linkElement = document.createElement('a');
+            linkElement.setAttribute('href', `${element.link}`)
+            linkElement.appendChild(card);
+            cardDiv.appendChild(linkElement);
+
+        })
+    }
+    function renderMenu(data) {
+        console.log(data);
+        let menu = document.getElementById("sidenav")
+        let index = 0;
+        data.forEach(element => {
+            let button = document.createElement('input');
+            button.type = "button";
+            button.setAttribute("id", index);
+            button.value = element.title;
+            let selectedCategoryIndex = sessionStorage.getItem("categoryIndex");
+            if (selectedCategoryIndex == index) {
+                button.classList.add("btn-primary");
+            }
+            button.onclick = function () {
+                getData(this.id);
+                sessionStorage.setItem("categoryIndex", this.id);
+                selectNewPrimary(this.id);
+
+            }
+            menu.appendChild(button);
+            index++;
+        })
+    }
+
+    function selectNewPrimary(categoryIndex) {
+        let inputList = document.getElementById("sidenav").querySelectorAll("input");
+        inputList.forEach(element => {
+            if (categoryIndex == element.id) {
+                element.classList.add("btn-primary")
+            }
+            else {
+                element.classList.remove("btn-primary");
+            }
+        })
+    }
+
+    function createCard(element) {
+        let cardElement = document.createElement('div');
+        cardElement.classList.add('card');
+        cardElement.style = "18rem";
+
+        let cardBodyElement = document.createElement('div');
+        cardBodyElement.classList.add('card-body');
+
+        let cardTitleElement = document.createElement('h5');
+        cardTitleElement.classList.add('card-title');
+        cardTitleElement.innerHTML = element.title;
+
+        let cardSubtitleElement = document.createElement('h6');
+        cardSubtitleElement.classList.add('card-subtitle');
+        cardSubtitleElement.classList.add('text-mute');
+        cardSubtitleElement.innerHTML = element.date;
+
+        let cardPElement = document.createElement('p');
+        cardPElement.classList.add('card-text');
+        cardPElement.innerHTML = element.description;
+
+        cardBodyElement.appendChild(cardTitleElement);
+        cardBodyElement.appendChild(cardSubtitleElement);
+        cardBodyElement.appendChild(cardPElement);
+
+        cardElement.appendChild(cardBodyElement);
+
+        return cardElement;
+    }
+
+
+
+</script>
